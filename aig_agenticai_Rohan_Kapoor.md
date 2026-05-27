@@ -4,7 +4,7 @@ Course on Generative AI / LLMs.
 
 ---
 
-## Lecture 1 — What is Generative AI & LLMs
+## Lecture 1 - What is Generative AI & LLMs
 
 **Big picture**
 
@@ -60,7 +60,7 @@ Attention Is All You Need (2017, transformers)
 
 ---
 
-## Lecture 2 — Transformers, Pre-training & Prompts
+## Lecture 2 - Transformers, Pre-training & Prompts
 
 **Fine-tuning is its own training run**
 
@@ -110,7 +110,7 @@ Attention Is All You Need (2017, transformers)
 
 ---
 
-## Lectures 3 & 4 — Hands-on: API & Prompt Engineering
+## Lectures 3 & 4 - API & Prompt Engineering
 
 **Why responses differ each time**
 
@@ -159,7 +159,7 @@ Attention Is All You Need (2017, transformers)
 
 ---
 
-## Lecture 5 — RAG (Retrieval-Augmented Generation)
+## Lecture 5 - RAG (Retrieval-Augmented Generation)
 
 **Why RAG?** Relying on the model's own training data is risky — it may not know your specific text (e.g. Bhagavad Gita / Bhagavatam) or only know it partially. RAG (or fine-tuning) fixes this. RAG = retrieve relevant info, then generate an answer using it.
 
@@ -247,7 +247,7 @@ Final input to LLM = Prompt (instruction) + Query (question) + Context (top-K re
 
 ---
 
-## Lecture 6 — Fine-tuning (and LoRA), plus Keyword-Augmented Retrieval
+## Lecture 6 - Fine-tuning (and LoRA), plus Keyword-Augmented Retrieval
 
 **Keyword-Augmented Retrieval (KAR) — an alternative to RAG**
 
@@ -307,7 +307,7 @@ Final input to LLM = Prompt (instruction) + Query (question) + Context (top-K re
 
 ---
 
-## Lecture 8 — RAG End-to-End: Hands-on Code (Hybrid Vector + Keyword Search)
+## Lecture 8 - RAG End-to-End: Hands-on Code (Hybrid Vector + Keyword Search)
 
 **Recap: why RAG or fine-tuning at all?**
 
@@ -335,7 +335,7 @@ Final input to LLM = Prompt (instruction) + Query (question) + Context (top-K re
 - For embeddings you use an **encoder** (self-attention only). Decoders add **cross-attention** (for mixing input/output, e.g. translation) — not needed for encoding.
 - The query and the documents **must use the same embeddings model**.
 
-**Code walkthrough (Google Colab + LlamaIndex)**
+**Code walkthrough (Google Colab)**
 
 1. **Install dependencies**
 2. **Import** libraries.
@@ -354,9 +354,9 @@ Final input to LLM = Prompt (instruction) + Query (question) + Context (top-K re
 
 ---
 
-## Lecture 9 — Multi-Agent Systems (CrewAI)
+## Lecture 9 - Multi-Agent Systems (CrewAI)
 
-**What's an agent? (myth-busting)**
+**What's an agent?**
 
 - An agent is **just a workflow / process automation**. A worker that takes an action by itself.
 - It may or may not use an LLM. In this demo, the LLM is only *part* of the workflow.
