@@ -428,3 +428,5 @@ Send email
 - Also legal risk: LLMs trained on others' data → regulators / copyright suits emerging. Be careful publishing LLM-generated books.
 
 ---
+
+*P.S. My own notes from the lectures - restructured with AI, with a few points and definitions filled in from the Video transcripts.*
