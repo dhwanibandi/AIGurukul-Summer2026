@@ -118,11 +118,11 @@ Attention Is All You Need (2017, transformers)
 
 **System prompt vs User prompt**
 
-- **System prompt**: set by the company, hidden, has higher priority. (This is why DeepSeek refuses certain topics, e.g. Taiwan — enforced via system prompt.) You can't change it on ChatGPT/commercial UIs.
+- **System prompt**: set by the company, hidden, has higher priority. (This is why DeepSeek refuses certain topics, e.g. Taiwan — enforced via system prompt.) You can't change it on commercial UIs.
 - **User prompt**: what you type. You can change this.
 - When you write your **own code** hitting the API directly, you can set **both** system and user prompt.
 
-**How the API call is structured** (Lecture 4 code walkthrough)
+**How the API call is structured**
 
 - `headers` carry the **API key**.
 - `payload` carries the **model name + system prompt + user prompt** (roles: `system` and `user`).
