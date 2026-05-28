@@ -156,7 +156,7 @@ d) Data needed : RAG - Low; FT - Lots of data to shine
 e) Best for : RAG - Quick development; FT - Specialised deployments 
 - For most projects, prefer RAG. Fine-tuning costs significantly more. Building a model from scratch is infeasible — always use existing models + RAG or fine-tuning instead
 
-##LEC 5
+## LEC 5
 
 Why RAG Exists:
 - LLMs rely entirely on their internal training data, which creates three key problems:
@@ -247,7 +247,7 @@ RAG enables "chat with your document" experiences:
 - Responses are grounded in your document, not generic AI training data
 This is significantly cheaper to build using open-source models than relying on paid services like ChatGPT
 
-##Lec 6
+## Lec 6
 - RAG converts a document corpus into vectors stored in a vector database. When a user submits a query, it is also converted into a vector and matched against stored document vectors. The retrieved documents are then passed alongside the original prompt as context for the model to generate an answer
 - The key point: RAG does not update or change the model itself. It simply feeds additional contextual information to the model at query time
 
@@ -402,7 +402,7 @@ c) Larger top-K values
 d) Chunk size tuning based on your specific LLM context window
 e) Research into chunk size optimisation papers for your use case
 
-##lec 9
+## lec 9
 What an Agent Actually Is:
 - An AI agent is essentially workflow process automation. It is not magical autonomous intelligence or something out of the ordinary. An agent is a worker that takes an action by itself — automating tasks that humans would otherwise do manually
 - Key distinctions:
