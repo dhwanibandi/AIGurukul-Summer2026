@@ -71,7 +71,7 @@ LLMs are inherently stateless. Every API call is a blank slate ,the model has no
 
 Store every query and response in a backend database
 Append that history as context on every new API call
-
+ 
 You can get creative with this — store user preferences and inject them into every prompt, or use a second model to summarise past conversations and pass that summary as context instead of the full history. The memory is always external; the model itself never retains anything.
 
 ## RAG vs Fine-Tuning
@@ -80,3 +80,207 @@ It is best Factual retrieval from fixed sources,works by pulling relevant text c
 #### Fine-Tuning
 It is best for changing model behaviour or personality,it works by actually modifies the model weights, it considers large datasets and so is comparitively has expensive compute.
 
+# Lecture 5
+Large Language Models (LLMs) possess extensive pre-trained knowledge, but they may lack information about:
+
+- Proprietary or private documents
+- Newly published information
+- Domain-specific knowledge bases
+- Large collections of documents that exceed the model's training scope
+
+Two common approaches to address this limitation are:
+
+- Fine-Tuning
+- Retrieval-Augmented Generation (RAG)
+## Retrival Augmented Generation (RAG)
+Retrieval-Augmented Generation (RAG) is a framework in which a language model retrieves relevant information from an external knowledge source and uses that information while generating a response.
+Instead of answering solely from its internal parameters ("memory"), the model answers using:
+
+User Query + Retrieved Context + Language Model
+
+This enables the model to access knowledge that was not part of its original training data.
+### Components of RAG 
+- Language Model (LLM)
+Responsible for generating the final response.
+Examples:GPT family,Llama,Flan-T5,Mistral
+- Embedding Model
+Converts text into numerical vector representations.
+Examples:
+OpenAI Embeddings,BGE,E5,Flan-UL2 embeddings
+- Vector Database
+Stores vector representations of documents and enables efficient similarity search.
+Examples:
+Faiss,ChromaDB,Pinecone,Weaviate
+- Retrieval/Search Method
+Used to identify the most relevant document chunks.
+Common methods:
+Similarity Search,Maximal Marginal Relevance (MMR)
+- Retrieval Chain
+Determines how retrieved documents are processed before being sent to the LLM.
+Examples:Stuff,MapReduce,Refine,MapRerank
+### RAG Architecture
+Documents
+    → Chunking
+    → Embedding Generation
+    → Vector Database Storage
+
+User Query
+    → Query Embedding
+    → Similarity Search
+    → Top-K Retrieval
+    → Context Construction
+    → LLM
+    → Generated Answer
+
+## Text → Vector Conversion
+
+```text
+Text
+→ Tokens
+→ Token IDs
+→ Embeddings (Vectors)
+```
+
+Example:
+
+```text
+"punctuation"
+→ ["punct", "uation"]
+→ [1524, 931]
+→ Vector
+```
+
+Semantically similar words have nearby vectors.
+
+Example:
+
+```text
+moksha ≈ liberation ≈ spiritual freedom
+```
+
+---
+
+## RAG Pipeline
+
+### Indexing Phase (One-Time)
+
+```text
+Documents
+→ Chunking
+→ Embedding Generation
+→ Vector Database
+```
+
+### Query Phase
+
+```text
+User Query
+→ Query Embedding
+→ Similarity Search
+→ Top-K Retrieval
+→ Context Construction
+→ LLM
+→ Generated Answer
+```
+
+---
+
+## Similarity Search
+
+The query and document chunks are compared in vector space.
+
+Common metric:
+
+- **Cosine Similarity**
+
+```text
+1.0 → Highly Similar
+0.0 → Unrelated
+```
+
+---
+
+## Top-K Retrieval
+
+Many chunks may be relevant.
+
+Process:
+
+```text
+Rank Chunks
+→ Select Top K
+→ Send to LLM
+```
+
+Typical values:
+
+```text
+K = 5, 10, 20
+```
+
+Constraint:
+
+```text
+K × Chunk Size ≤ Context Window
+```
+
+---
+
+## Metadata Filtering
+
+Restricts search before retrieval.
+
+Examples:
+
+- Chapter Number
+- Document Name
+- Date
+- Category
+
+Example:
+
+```text
+Search only within Chapter 18
+```
+
+---
+
+## Retrieval Strategies
+
+| Strategy | Description |
+|-----------|------------|
+| Stuff | Put all chunks directly into prompt |
+| MapReduce | Process chunks separately, then combine |
+| Refine | Sequentially improve answer |
+| MapRerank | Generate multiple answers and choose best |
+
+**Stuff is the most commonly used approach.**
+
+---
+
+## Fine-Tuning vs RAG
+
+| Fine-Tuning | RAG |
+|------------|-----|
+| Updates model weights | No model changes |
+| Permanent knowledge | Temporary context |
+| Requires retraining | No retraining |
+| Harder to update | Easy to update |
+
+---
+
+## Privacy Advantage
+
+Private documents remain in the organisation's infrastructure.
+
+Only relevant chunks are retrieved and sent during inference.
+
+---
+
+## Limitation
+
+RAG can only answer using information present in the indexed documents.
+
+**Poor documents → Poor retrieval → Poor answers**
+
+---
