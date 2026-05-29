@@ -284,3 +284,364 @@ RAG can only answer using information present in the indexed documents.
 **Poor documents → Poor retrieval → Poor answers**
 
 ---
+# Lecture 6: Fine-Tuning, LoRA & Evaluation
+
+## Why Fine-Tuning?
+
+RAG can provide external knowledge, but it **cannot change model behavior**.
+
+Fine-tuning is used to modify:
+
+- Tone and communication style
+- Persona (teacher, assistant, customer support, etc.)
+- Output formatting
+- Domain-specific reasoning patterns
+
+### Real-World Architecture
+
+```text
+RAG → Retrieves factual knowledge
+Fine-Tuning → Controls model behavior/personality
+```
+
+Example:
+
+```text
+Course PDFs/Notes → RAG
+Teaching Style → Fine-Tuning
+```
+
+---
+
+# Limitation of RAG
+
+Standard RAG relies on vector similarity.
+
+Problem:
+
+A name may appear only once in a document and later be referenced using pronouns.
+
+Example:
+
+```text
+"Narendra Modi" appears once
+Later: "he", "the Prime Minister"
+```
+
+A vector search on "Narendra Modi" may fail to retrieve relevant chunks.
+
+---
+
+# Keyword Augmented Retrieval (KAR)
+
+KAR uses keyword matching instead of relying solely on vector similarity.
+
+Process:
+
+```text
+Query
+→ Extract Keywords
+→ Match Against Document Keywords
+→ Retrieve Relevant Chunks
+```
+
+Works well for:
+
+- Proper nouns
+- Names
+- Sparse datasets
+- Rare keywords
+
+---
+
+## RAG vs KAR
+
+| RAG (Vector Search) | KAR (Keyword Search) |
+|---------------------|----------------------|
+| Semantic similarity | Exact keyword matching |
+| Works on dense text | Works on sparse text |
+| Handles related concepts | Handles names/entities |
+| Can miss rare terms | Can miss semantic relations |
+
+### Best Practice
+
+```text
+Hybrid Search = RAG + KAR
+```
+
+Use vector similarity and keyword matching together.
+
+---
+
+# Fine-Tuning Data Format
+
+Fine-tuning requires:
+
+```text
+Question → Answer
+```
+
+Raw PDFs or articles cannot be used directly.
+
+Example:
+
+```text
+Q: What is LoRA?
+A: A parameter-efficient fine-tuning method.
+```
+
+Thousands of such examples are needed.
+
+---
+
+# Synthetic Data Generation
+
+Manually creating large datasets is expensive.
+
+Solution:
+
+```text
+Large Model (GPT-4)
+→ Generate Q&A Pairs
+→ Fine-Tune Smaller Model
+```
+
+Benefits:
+
+- Faster dataset creation
+- Lower cost
+- Smaller models can mimic larger ones
+
+---
+
+# Full Fine-Tuning
+
+Updates every parameter in the model.
+
+```text
+Data
+→ Train All Weights
+→ Updated Model
+```
+
+### Advantages
+
+- Maximum adaptability
+- Best possible performance
+
+### Disadvantages
+
+- Extremely expensive
+- Large memory requirements
+- Risk of catastrophic forgetting
+
+---
+
+# Catastrophic Forgetting
+
+During fine-tuning, the model may overwrite previously learned knowledge.
+
+```text
+Old Knowledge + New Training
+→ Old Knowledge Lost
+```
+
+More common in full fine-tuning.
+
+---
+
+# LoRA (Low-Rank Adaptation)
+
+Most popular parameter-efficient fine-tuning method.
+
+Core idea:
+
+```text
+Freeze Original Model
++
+Train Small Adapter Layers
+```
+
+Instead of updating billions of parameters, LoRA updates less than 1%.
+
+---
+
+## LoRA vs Full Fine-Tuning
+
+| Full Fine-Tuning | LoRA |
+|------------------|-------|
+| Updates all parameters | Updates adapters only |
+| High memory usage | Low memory usage |
+| Catastrophic forgetting risk | Much lower risk |
+| Expensive | Cheap |
+| Best quality | Near-equivalent quality |
+
+---
+
+## LoRA Rank (r)
+
+Controls adapter size.
+
+```text
+Higher Rank
+→ More trainable parameters
+→ Better learning
+→ More memory usage
+```
+
+Common values:
+
+```text
+r = 4, 8, 16
+```
+
+As:
+
+```text
+r → ∞
+```
+
+LoRA approaches full fine-tuning.
+
+---
+
+# Hardware Requirements
+
+Memory per parameter:
+
+```text
+1 Parameter ≈ 4 Bytes
+```
+
+Example:
+
+```text
+1B Parameters ≈ 4 GB
+70B Parameters ≈ 280 GB
+```
+
+Training additionally requires:
+
+- Gradients
+- Optimizer states
+- Activations
+
+Result:
+
+```text
+70B Model
+≈ 1.5+ TB memory (full precision training)
+```
+
+---
+
+# Quantization
+
+Reduces precision of weights.
+
+Example:
+
+```text
+32-bit → 16-bit → 8-bit → 4-bit
+```
+
+Benefits:
+
+- Lower VRAM usage
+- Faster training
+- Cheaper deployment
+
+Usually combined with LoRA.
+
+---
+
+# Evaluating LLMs
+
+Evaluation is needed to verify improvements from RAG or Fine-Tuning.
+
+## Common Metrics
+
+| Metric | Purpose |
+|----------|---------|
+| BLEU | Translation quality |
+| ROUGE | Summarization quality |
+| Perplexity | Model confidence |
+| F1 Score | QA accuracy |
+| HELM | Holistic LLM evaluation |
+
+---
+
+## HELM (Stanford)
+
+Holistic Evaluation of Language Models.
+
+Measures:
+
+- Accuracy
+- Robustness
+- Fairness
+- Bias
+- Toxicity
+- Calibration
+
+Provides a comprehensive benchmark for LLM quality.
+
+---
+
+# SFT vs RLHF
+
+## Supervised Fine-Tuning (SFT)
+
+Train directly on Q&A pairs.
+
+```text
+Question
+→ Answer
+→ Update Weights
+```
+
+Simple and commonly used.
+
+---
+
+## RLHF
+
+Reinforcement Learning from Human Feedback.
+
+Process:
+
+```text
+Human Preferences
+→ Reward Model
+→ PPO Optimization
+→ Improved LLM
+```
+
+Humans rank responses instead of providing direct labels.
+
+---
+
+# Key Takeaways
+
+```text
+RAG
+→ Adds external knowledge
+
+KAR
+→ Fixes sparse keyword retrieval problems
+
+Fine-Tuning
+→ Changes model behavior
+
+LoRA
+→ Efficient fine-tuning (<1% parameters)
+
+Quantization
+→ Reduces memory usage
+
+HELM
+→ Evaluates overall model quality
+
+Best Real-World System
+→ RAG + KAR + LoRA Fine-Tuning
+```
