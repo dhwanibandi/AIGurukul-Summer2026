@@ -645,3 +645,219 @@ HELM
 Best Real-World System
 → RAG + KAR + LoRA Fine-Tuning
 ```
+
+
+# Lecture 8
+
+## Why Generic LLMs Are Not Enough
+
+- A pretrained LLM only knows what it has seen during training.
+- It cannot answer questions about proprietary company data, internal documents, or domain-specific information that was never part of its training corpus.
+- Two major solutions:
+  - **RAG (Retrieval-Augmented Generation)**
+  - **Fine-Tuning**
+- RAG is usually the preferred starting point because it is much cheaper and easier to implement.
+
+## RAG vs Fine-Tuning
+
+### RAG
+
+- Does not modify model weights.
+- Retrieves relevant information during query time.
+- Injects retrieved information into the prompt.
+- Low computational cost.
+- Best for factual knowledge retrieval.
+
+### Fine-Tuning
+
+- Updates model weights through additional training.
+- Knowledge becomes part of the model.
+- Requires significant computational resources.
+- Best for changing behaviour, style, or domain expertise.
+
+---
+
+## Vector Database
+
+- Stores information in two forms:
+  - Original text chunk
+  - Vector embedding
+- Queries are also converted into vectors.
+- Similarity search finds the closest chunk vectors.
+- Retrieved text chunks are passed to the LLM.
+
+---
+
+## RAG Pipeline
+
+### Indexing Phase (One-Time Process)
+
+1. Load source documents.
+2. Extract text.
+3. Split text into chunks.
+4. Generate embeddings for each chunk.
+5. Store chunk text and embeddings in a vector database.
+6. Extract and store keywords separately.
+
+### Query Phase
+
+1. Convert user query into an embedding.
+2. Perform vector similarity search.
+3. Perform keyword search.
+4. Merge both result sets.
+5. Pass retrieved chunks and query to the LLM.
+6. Generate the final response.
+
+---
+
+## Hybrid Search
+
+Hybrid search combines:
+
+### Vector Retrieval
+
+- Uses semantic similarity.
+- Understands meaning and paraphrases.
+- Example:
+  - "car" ≈ "automobile"
+
+### Keyword Retrieval
+
+- Uses exact keyword matching.
+- Useful for:
+  - Names
+  - Locations
+  - IDs
+  - Rare terms
+
+### Merge Strategies
+
+#### AND Merge
+
+- Chunk must appear in both searches.
+- Higher precision.
+- Smaller result set.
+
+#### OR Merge
+
+- Chunk can appear in either search.
+- Broader coverage.
+- Larger result set.
+
+---
+
+## Why the Same Embedding Model Must Be Used
+
+- Document chunks and user queries must exist in the same vector space.
+- Using different embedding models makes similarity scores meaningless.
+- The same embedding model must be used during:
+  - Indexing
+  - Retrieval
+
+---
+
+## Encoder vs Decoder Models
+
+### Encoder Models
+
+- Produce fixed-length vector representations.
+- Used for embeddings.
+- Examples:
+  - BERT
+  - Sentence Transformers
+  - embedding-001
+
+### Decoder Models
+
+- Generate text token by token.
+- Used for response generation.
+- Examples:
+  - GPT
+  - Gemini
+  - Claude
+  - LLaMA
+
+### In RAG
+
+- Encoder → Creates embeddings.
+- Decoder → Generates the final answer.
+
+---
+
+## Chunk Size
+
+Chunk size determines how much text is stored in each chunk.
+
+### Small Chunks
+
+- Better retrieval precision.
+- Less surrounding context.
+
+### Large Chunks
+
+- More context.
+- Lower retrieval precision.
+
+Typical chunk sizes:
+
+- 1024 tokens
+- 2048 tokens
+
+---
+
+## Top-K Retrieval
+
+- Top-K = Number of chunks retrieved.
+- Larger K provides more context.
+- Too large a value introduces noise and may exceed the context window.
+
+Constraint:
+
+Top-K × Chunk Size ≤ Context Window
+
+---
+
+## LlamaIndex Components
+
+### Embedding Model
+
+- Converts text into vectors.
+
+### VectorStoreIndex
+
+- Stores chunk embeddings.
+
+### KeywordTableIndex
+
+- Stores chunk keywords.
+
+### Custom Retriever
+
+- Combines vector and keyword retrieval.
+
+### Response Synthesizer
+
+- Sends retrieved chunks and query to the LLM.
+
+### Query Engine
+
+- Connects retriever and synthesizer.
+
+---
+
+## RAG as a Simple Agent
+
+- A RAG system already behaves like a basic AI agent.
+- It interacts with an external knowledge source.
+- Retrieves information.
+- Uses that information to answer questions.
+
+More advanced agents extend the same idea to:
+
+- Web Search
+- Databases
+- Email APIs
+- Calendar APIs
+- External Services
+
+RAG is the foundation of modern AI agent systems.
