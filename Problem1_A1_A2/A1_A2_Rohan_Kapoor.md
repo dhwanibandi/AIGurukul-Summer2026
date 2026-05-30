@@ -106,6 +106,162 @@ From the actual boundary edges (not the bounding box) plus the setbacks:
 
 **Feedback to Agent 1:** Stop using min/max bounding coordinates. North lot line is y = 84 (not 88); south lot line is y = 8 except the central notch. Corrected target: `(5, 15), (75, 15), (75, 77), (5, 77)`.
 
+**Agent 1 code (Iteration 1):**
+
+```python
+import ezdxf
+from ezdxf.math import Vec2
+import math
+
+def create_house_dxf():
+    doc = ezdxf.new()
+    msp = doc.modelspace()
+
+    # ========== PLOT BOUNDARY ==========
+    plot_vertices = [
+        (0, 8), (35, 8), (35, 0), (75, 0),
+        (75, 8), (80, 8), (80, 88), (75, 88),
+        (75, 84), (0, 84)
+    ]
+    # Close the polyline by adding first point at end
+    plot_vertices.append(plot_vertices[0])
+
+    msp.add_lwpolyline(
+        plot_vertices,
+        dxfattribs={'layer': 'PLOT', 'color': 1}
+    )
+
+    # ========== TREE KEEP-OUT CIRCLE ==========
+    tree_center = (77.5, 86)
+    tree_radius = math.sqrt(3)  # ≈ 1.732 ft
+    msp.add_circle(
+        tree_center, tree_radius,
+        dxfattribs={'layer': 'TREE', 'color': 2}
+    )
+
+    # ========== SETBACKS & MAXIMUM RECTANGLE ==========
+    # Plot extreme points:
+    x_min_plot = 0
+    x_max_plot = 80
+    y_min_plot = 0
+    y_max_plot = 88
+
+    # Setback distances
+    setback_front = 7.0   # South (y=0)
+    setback_rear = 7.0    # North (y=88)
+    setback_west = 5.0    # West (x=0)
+    setback_east = 5.0    # East (x=80)
+
+    # Initial feasible rectangle from setbacks
+    house_x_min = x_min_plot + setback_west
+    house_x_max = x_max_plot - setback_east
+    house_y_min = y_min_plot + setback_front
+    house_y_max = y_max_plot - setback_rear
+
+    # Adjust for tree (must not enter circle)
+    # Tree center: (77.5, 86), radius 1.732
+    # The tree is near the northeast corner.
+    # We'll find the largest rectangle that fits entirely within the plot,
+    # respects setbacks, and does not intersect the tree circle.
+
+    # Since the tree is at top right, we reduce right side or top side if needed.
+    # We'll test shifting the rectangle's top or right edge until no intersection.
+    # Because we must maximize area, we will try to keep rightmost edge at x_max_house_possible.
+
+    # First, allow rectangle to extend to setback boundaries
+    # Then check collision with circle.
+
+    # Use a helper to test if a rectangle (xmin, xmax, ymin, ymax) intersects circle
+    def rect_intersects_circle(xmin, xmax, ymin, ymax, cx, cy, r):
+        # Find closest point in rectangle to circle center
+        closest_x = max(xmin, min(cx, xmax))
+        closest_y = max(ymin, min(cy, ymax))
+        dist_sq = (closest_x - cx)**2 + (closest_y - cy)**2
+        return dist_sq < r**2
+
+    # Start with largest possible (by setbacks) and adjust if needed
+    trial_xmin = house_x_min
+    trial_xmax = house_x_max
+    trial_ymin = house_y_min
+    trial_ymax = house_y_max
+
+    # We will only trim if necessary, prioritizing area.
+    # The tree is at top-right, so we may need to shrink from right or top.
+    if rect_intersects_circle(trial_xmin, trial_xmax, trial_ymin, trial_ymax,
+                              tree_center[0], tree_center[1], tree_radius):
+        # Two strategies: move left edge right? No, left edge is fixed by setback.
+        # Better: move right edge left or top edge down.
+        # We try both and pick larger area.
+
+        # Option A: move right edge left until no collision
+        xmax_opt = trial_xmax
+        for x in range(int(trial_xmax*10), int(trial_xmin*10), -1):
+            cand_xmax = x / 10.0
+            if not rect_intersects_circle(trial_xmin, cand_xmax, trial_ymin, trial_ymax,
+                                          tree_center[0], tree_center[1], tree_radius):
+                xmax_opt = cand_xmax
+                break
+        area_A = (xmax_opt - trial_xmin) * (trial_ymax - trial_ymin)
+
+        # Option B: move top edge down until no collision
+        ymax_opt = trial_ymax
+        for y in range(int(trial_ymax*10), int(trial_ymin*10), -1):
+            cand_ymax = y / 10.0
+            if not rect_intersects_circle(trial_xmin, trial_xmax, trial_ymin, cand_ymax,
+                                          tree_center[0], tree_center[1], tree_radius):
+                ymax_opt = cand_ymax
+                break
+        area_B = (trial_xmax - trial_xmin) * (ymax_opt - trial_ymin)
+
+        # Choose best option
+        if area_A >= area_B:
+            trial_xmax = xmax_opt
+        else:
+            trial_ymax = ymax_opt
+
+    # Final house rectangle (closed polyline)
+    house_rect = [
+        (trial_xmin, trial_ymin),  # bottom-left
+        (trial_xmax, trial_ymin),  # bottom-right
+        (trial_xmax, trial_ymax),  # top-right
+        (trial_xmin, trial_ymax),  # top-left
+        (trial_xmin, trial_ymin)   # close
+    ]
+
+    msp.add_lwpolyline(
+        house_rect,
+        dxfattribs={'layer': 'HOUSE', 'color': 3}
+    )
+
+    # ========== ENTRY MARKER (south edge, 35 to 75 on y=0) ==========
+    entry_start = (35, 0)
+    entry_end = (75, 0)
+    entry_mid = ((35+75)/2, 0)
+    inward_length = 2.0
+    entry_line_end = (entry_mid[0], entry_mid[1] + inward_length)
+    msp.add_line(
+        entry_mid, entry_line_end,
+        dxfattribs={'layer': 'HOUSE', 'color': 4}
+    )
+    msp.add_circle(
+        entry_mid, 0.2,
+        dxfattribs={'layer': 'HOUSE', 'color': 4}
+    )
+
+    # Save the DXF
+    doc.saveas("house.dxf")
+    print("DXF file 'house.dxf' generated successfully.")
+
+    return house_rect[:-1]  # exclude the closing duplicate
+
+# ========== EXECUTE ==========
+house_corners = create_house_dxf()
+
+print("\nFinal list of house-corner coordinates in order (feet, x,y):")
+for corner in house_corners:
+    print(f"({corner[0]:.2f}, {corner[1]:.2f})")
+```
+
 ### Iteration 2 - PASS (6 / 6)
 
 **Agent 1 output:** `(5, 15), (75, 15), (75, 77), (5, 77)`
@@ -118,6 +274,81 @@ From the actual boundary edges (not the bounding box) plus the setbacks:
 | 4 | Maximize footprint | **PASS** - 4,340 sq ft, the largest legal rectangle |
 | 5 | Single south entry | **PASS** - marker at (55, 0) |
 | 6 | Outer periphery only | **PASS** |
+
+**Agent 1 code (Iteration 2 — corrected):**
+
+```python
+import ezdxf
+import math
+
+def create_house_dxf():
+    doc = ezdxf.new()
+    msp = doc.modelspace()
+
+    # ========== PLOT BOUNDARY ==========
+    plot_vertices = [
+        (0, 8), (35, 8), (35, 0), (75, 0),
+        (75, 8), (80, 8), (80, 88), (75, 88),
+        (75, 84), (0, 84)
+    ]
+    plot_vertices.append(plot_vertices[0])  # close polyline
+    msp.add_lwpolyline(
+        plot_vertices,
+        dxfattribs={'layer': 'PLOT', 'color': 1}
+    )
+
+    # ========== PROTECTED TREE ==========
+    tree_center = (77.5, 86)
+    tree_radius = math.sqrt(3)  # ≈ 1.732 ft
+    msp.add_circle(
+        tree_center, tree_radius,
+        dxfattribs={'layer': 'TREE', 'color': 2}
+    )
+
+    # ========== CORRECTED HOUSE RECTANGLE ==========
+    # Based on actual plot boundary, not bounding box:
+    # West setback 5 ft  -> x_min = 0 + 5 = 5
+    # East setback 5 ft  -> x_max = 80 - 5 = 75
+    # Front (south) edge: binding y = 8 (for x < 35) + 7 = 15
+    # Rear (north) edge:  y = 84 - 7 = 77
+    house_corners = [
+        (5, 15),   # bottom-left
+        (75, 15),  # bottom-right
+        (75, 77),  # top-right
+        (5, 77),   # top-left
+        (5, 15)    # close
+    ]
+    msp.add_lwpolyline(
+        house_corners,
+        dxfattribs={'layer': 'HOUSE', 'color': 3}
+    )
+
+    # ========== ENTRY MARKER (south edge, 35 to 75 on y=0) ==========
+    entry_mid = ((35 + 75) / 2, 0)
+    inward_length = 2.0
+    entry_line_end = (entry_mid[0], entry_mid[1] + inward_length)
+    msp.add_line(
+        entry_mid, entry_line_end,
+        dxfattribs={'layer': 'HOUSE', 'color': 4}
+    )
+    msp.add_circle(
+        entry_mid, 0.2,
+        dxfattribs={'layer': 'HOUSE', 'color': 4}
+    )
+
+    # ========== SAVE DXF ==========
+    doc.saveas("house.dxf")
+    print("DXF file 'house.dxf' generated successfully with corrected house rectangle.")
+
+    return house_corners[:-1]  # exclude closing duplicate
+
+# Run and display corners
+final_corners = create_house_dxf()
+
+print("\nFinal list of house-corner coordinates in order (feet, x, y):")
+for corner in final_corners:
+    print(f"({corner[0]:.2f}, {corner[1]:.2f})")
+```
 
 **The loop converged in 2 iterations.**
 <img width="2000" height="2000" alt="desmos-graph-1" src="https://github.com/user-attachments/assets/a20f67d7-c8ce-4c97-a232-5b9584f472c0" />
