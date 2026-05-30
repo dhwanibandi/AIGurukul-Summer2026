@@ -36,7 +36,7 @@ The plot is an irregular, fully rectilinear (all edges horizontal/vertical) poly
 (0, 8) → (35, 8) → (35, 0) → (75, 0) → (75, 8) → (80, 8)
 → (80, 88) → (75, 88) → (75, 84) → (0, 84) → back to (0, 8)
 ```
-![alt text](<desmos-graph (1)-1.png>)
+<img width="2000" height="2000" alt="desmos-graph (1)-1" src="https://github.com/user-attachments/assets/79baee8c-4bfd-4ab2-a758-8ebcce349299" />
 
 ---
 
@@ -120,7 +120,8 @@ From the actual boundary edges (not the bounding box) plus the setbacks:
 | 6 | Outer periphery only | **PASS** |
 
 **The loop converged in 2 iterations.**
-![alt text](desmos-graph-1.png)
+<img width="2000" height="2000" alt="desmos-graph-1" src="https://github.com/user-attachments/assets/a20f67d7-c8ce-4c97-a232-5b9584f472c0" />
+
 
 ---
 
