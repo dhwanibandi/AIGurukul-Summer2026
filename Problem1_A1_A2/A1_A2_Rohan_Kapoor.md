@@ -46,6 +46,8 @@ The plot is an irregular, fully rectilinear (all edges horizontal/vertical) poly
 2. The house respects the **setbacks** from every boundary edge.
 3. The house does **not enter the protected tree** keep-out circle.
 4. The house **maximizes its footprint** within the legal area.
+5. **Exactly one entry side** — main door + parking together — on the **South edge**, along the 40 ft segment (x from 35 to 75, y = 0).
+6. Only the **outer periphery** of the house is drawn — a single closed polyline, no internal rooms.
 
 ---
 
