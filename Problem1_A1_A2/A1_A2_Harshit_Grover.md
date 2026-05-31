@@ -427,9 +427,10 @@ Utilization: 45.79%
 ---
 
 ## Findings
- 
-- Both agents performed better when data and values were typed out directly — giving images or documents led to worse results
-- A1 sometimes manipulated its calculations to match what was already in the code, even when that was incorrect
-- Number of iterations was not fixed — in some runs the first output was already correct, in others it took more rounds
-- A2 (verifier) was not always reliable — in some runs it passed an incorrect layout
+
+- I tried running the entire process multiple times, and the result varied a lot.
+- Both agents performed better when data and values were typed out directly — giving images or documents led to worse results.
+- Both A1 and A2 sometimes manipulated its calculations to match what was already in the code, even when that was incorrect.
+- Number of iterations was not fixed — in some runs the first output was already correct, in others it took more rounds.
+- A2 (verifier) was not always reliable — in some runs it passed an incorrect layout.
 - Most errors were in misinterpreting the plot boundaries, specifically which setback applies to which wall.
