@@ -80,288 +80,170 @@ It is best Factual retrieval from fixed sources,works by pulling relevant text c
 #### Fine-Tuning
 It is best for changing model behaviour or personality,it works by actually modifies the model weights, it considers large datasets and so is comparitively has expensive compute.
 
-# Lecture 5
-Large Language Models (LLMs) possess extensive pre-trained knowledge, but they may lack information about:
+# Lecture 5 - Retrieval Augmented Generation (RAG)
 
-- Proprietary or private documents
-- Newly published information
-- Domain-specific knowledge bases
-- Large collections of documents that exceed the model's training scope
+## Why RAG?
 
-Two common approaches to address this limitation are:
+- LLMs cannot access:
+  - Private company documents
+  - Newly published information
+  - Domain-specific knowledge bases
+- Two major solutions:
+  - RAG
+  - Fine-Tuning
 
-- Fine-Tuning
-- Retrieval-Augmented Generation (RAG)
-## Retrival Augmented Generation (RAG)
-Retrieval-Augmented Generation (RAG) is a framework in which a language model retrieves relevant information from an external knowledge source and uses that information while generating a response.
-Instead of answering solely from its internal parameters ("memory"), the model answers using:
+## What is RAG?
 
-User Query + Retrieved Context + Language Model
-
-This enables the model to access knowledge that was not part of its original training data.
-### Components of RAG 
-- Language Model (LLM)
-Responsible for generating the final response.
-Examples:GPT family,Llama,Flan-T5,Mistral
-- Embedding Model
-Converts text into numerical vector representations.
-Examples:
-OpenAI Embeddings,BGE,E5,Flan-UL2 embeddings
-- Vector Database
-Stores vector representations of documents and enables efficient similarity search.
-Examples:
-Faiss,ChromaDB,Pinecone,Weaviate
-- Retrieval/Search Method
-Used to identify the most relevant document chunks.
-Common methods:
-Similarity Search,Maximal Marginal Relevance (MMR)
-- Retrieval Chain
-Determines how retrieved documents are processed before being sent to the LLM.
-Examples:Stuff,MapReduce,Refine,MapRerank
-### RAG Architecture
-Documents
-    → Chunking
-    → Embedding Generation
-    → Vector Database Storage
-
-User Query
-    → Query Embedding
-    → Similarity Search
-    → Top-K Retrieval
-    → Context Construction
-    → LLM
-    → Generated Answer
-
-## Text → Vector Conversion
+- RAG retrieves relevant information from an external knowledge source before generating an answer.
+- Instead of relying only on model memory:
 
 ```text
-Text
-→ Tokens
-→ Token IDs
-→ Embeddings (Vectors)
+User Query + Retrieved Context + LLM
 ```
 
-Example:
+## Core Components
 
-```text
-"punctuation"
-→ ["punct", "uation"]
-→ [1524, 931]
-→ Vector
-```
+### LLM
+- Generates the final response.
 
-Semantically similar words have nearby vectors.
+### Embedding Model
+- Converts text into vectors.
+- Similar meanings produce similar vectors.
 
-Example:
+### Vector Database
+- Stores:
+  - Text chunks
+  - Their embeddings
 
-```text
-moksha ≈ liberation ≈ spiritual freedom
-```
-
----
+### Retriever
+- Finds relevant chunks using similarity search.
 
 ## RAG Pipeline
 
-### Indexing Phase (One-Time)
+### Indexing Phase
 
 ```text
 Documents
 → Chunking
-→ Embedding Generation
+→ Embeddings
 → Vector Database
 ```
 
 ### Query Phase
 
 ```text
-User Query
-→ Query Embedding
+Query
+→ Embedding
 → Similarity Search
-→ Top-K Retrieval
-→ Context Construction
+→ Top-K Chunks
 → LLM
-→ Generated Answer
+→ Answer
 ```
-
----
 
 ## Similarity Search
 
-The query and document chunks are compared in vector space.
+- Retrieval happens in vector space.
+- Usually uses cosine similarity.
 
-Common metric:
+## Chunking
 
-- **Cosine Similarity**
+- Documents are split into chunks before indexing.
 
-```text
-1.0 → Highly Similar
-0.0 → Unrelated
-```
+Small chunks:
+- Better precision
+- Less context
 
----
+Large chunks:
+- More context
+- Lower precision
+
+Typical sizes:
+- 1024 tokens
+- 2048 tokens
 
 ## Top-K Retrieval
 
-Many chunks may be relevant.
-
-Process:
-
-```text
-Rank Chunks
-→ Select Top K
-→ Send to LLM
-```
-
-Typical values:
-
-```text
-K = 5, 10, 20
-```
+- Retrieves the K most relevant chunks.
 
 Constraint:
 
 ```text
-K × Chunk Size ≤ Context Window
+Top-K × Chunk Size ≤ Context Window
 ```
-
----
-
-## Metadata Filtering
-
-Restricts search before retrieval.
-
-Examples:
-
-- Chapter Number
-- Document Name
-- Date
-- Category
-
-Example:
-
-```text
-Search only within Chapter 18
-```
-
----
 
 ## Retrieval Strategies
 
-| Strategy | Description |
-|-----------|------------|
-| Stuff | Put all chunks directly into prompt |
-| MapReduce | Process chunks separately, then combine |
-| Refine | Sequentially improve answer |
-| MapRerank | Generate multiple answers and choose best |
+### Stuff
+- Send all retrieved chunks directly.
 
-**Stuff is the most commonly used approach.**
+### MapReduce
+- Process chunks independently and combine results.
 
----
+### Refine
+- Improve answer iteratively.
+
+### MapRerank
+- Generate multiple answers and select the best.
 
 ## Fine-Tuning vs RAG
 
 | Fine-Tuning | RAG |
 |------------|-----|
-| Updates model weights | No model changes |
+| Changes model weights | No model changes |
 | Permanent knowledge | Temporary context |
-| Requires retraining | No retraining |
-| Harder to update | Easy to update |
-
----
-
-## Privacy Advantage
-
-Private documents remain in the organisation's infrastructure.
-
-Only relevant chunks are retrieved and sent during inference.
-
----
-
-## Limitation
-
-RAG can only answer using information present in the indexed documents.
-
-**Poor documents → Poor retrieval → Poor answers**
-
----
-# Lecture 6: Fine-Tuning, LoRA & Evaluation
+| Expensive | Cheap |
+| Hard to update | Easy to update |
+# Lecture 6 - Fine-Tuning, LoRA & Evaluation
 
 ## Why Fine-Tuning?
 
-RAG can provide external knowledge, but it **cannot change model behavior**.
+RAG provides knowledge but cannot change behaviour.
 
-Fine-tuning is used to modify:
+Fine-tuning changes:
 
-- Tone and communication style
-- Persona (teacher, assistant, customer support, etc.)
-- Output formatting
-- Domain-specific reasoning patterns
+- Tone
+- Personality
+- Output style
+- Domain-specific reasoning
 
-### Real-World Architecture
-
-```text
-RAG → Retrieves factual knowledge
-Fine-Tuning → Controls model behavior/personality
-```
-
-Example:
+Typical production setup:
 
 ```text
-Course PDFs/Notes → RAG
-Teaching Style → Fine-Tuning
+Knowledge → RAG
+Behaviour → Fine-Tuning
 ```
 
----
+## Limitation of Pure RAG
 
-# Limitation of RAG
+Vector search struggles with:
 
-Standard RAG relies on vector similarity.
-
-Problem:
-
-A name may appear only once in a document and later be referenced using pronouns.
-
-Example:
-
-```text
-"Narendra Modi" appears once
-Later: "he", "the Prime Minister"
-```
-
-A vector search on "Narendra Modi" may fail to retrieve relevant chunks.
-
----
-
-# Keyword Augmented Retrieval (KAR)
-
-KAR uses keyword matching instead of relying solely on vector similarity.
-
-Process:
-
-```text
-Query
-→ Extract Keywords
-→ Match Against Document Keywords
-→ Retrieve Relevant Chunks
-```
-
-Works well for:
-
-- Proper nouns
 - Names
+- Proper nouns
+- Rare entities
+- Sparse documents
+
+Example:
+
+```text
+Narendra Modi
+↓
+he
+↓
+the Prime Minister
+```
+
+Relevant chunks may be missed.
+
+## Keyword Augmented Retrieval (KAR)
+
+Uses keyword matching alongside vector search.
+
+Best for:
+
+- Names
+- IDs
+- Proper nouns
 - Sparse datasets
-- Rare keywords
-
----
-
-## RAG vs KAR
-
-| RAG (Vector Search) | KAR (Keyword Search) |
-|---------------------|----------------------|
-| Semantic similarity | Exact keyword matching |
-| Works on dense text | Works on sparse text |
-| Handles related concepts | Handles names/entities |
-| Can miss rare terms | Can miss semantic relations |
 
 ### Best Practice
 
@@ -369,211 +251,114 @@ Works well for:
 Hybrid Search = RAG + KAR
 ```
 
-Use vector similarity and keyword matching together.
+## Fine-Tuning Data
 
----
-
-# Fine-Tuning Data Format
-
-Fine-tuning requires:
+Training requires:
 
 ```text
 Question → Answer
 ```
 
-Raw PDFs or articles cannot be used directly.
+not raw PDFs.
 
 Example:
 
 ```text
 Q: What is LoRA?
-A: A parameter-efficient fine-tuning method.
+A: Parameter-efficient fine-tuning.
 ```
 
-Thousands of such examples are needed.
+## Synthetic Data
 
----
-
-# Synthetic Data Generation
-
-Manually creating large datasets is expensive.
-
-Solution:
+Instead of writing datasets manually:
 
 ```text
-Large Model (GPT-4)
+Large Model
 → Generate Q&A Pairs
 → Fine-Tune Smaller Model
 ```
 
-Benefits:
-
-- Faster dataset creation
-- Lower cost
-- Smaller models can mimic larger ones
-
----
-
-# Full Fine-Tuning
-
-Updates every parameter in the model.
+## Full Fine-Tuning
 
 ```text
-Data
-→ Train All Weights
-→ Updated Model
+Train All Parameters
 ```
 
-### Advantages
+Advantages:
 
-- Maximum adaptability
-- Best possible performance
+- Highest flexibility
 
-### Disadvantages
+Disadvantages:
 
-- Extremely expensive
-- Large memory requirements
+- Expensive
+- Huge memory requirements
 - Risk of catastrophic forgetting
 
----
-
-# Catastrophic Forgetting
-
-During fine-tuning, the model may overwrite previously learned knowledge.
+## Catastrophic Forgetting
 
 ```text
-Old Knowledge + New Training
+New Training
 → Old Knowledge Lost
 ```
 
-More common in full fine-tuning.
+## LoRA
 
----
+Low-Rank Adaptation.
 
-# LoRA (Low-Rank Adaptation)
-
-Most popular parameter-efficient fine-tuning method.
-
-Core idea:
+Idea:
 
 ```text
-Freeze Original Model
+Freeze Base Model
 +
-Train Small Adapter Layers
+Train Small Adapters
 ```
 
-Instead of updating billions of parameters, LoRA updates less than 1%.
-
----
+Updates <1% of parameters.
 
 ## LoRA vs Full Fine-Tuning
 
-| Full Fine-Tuning | LoRA |
-|------------------|-------|
-| Updates all parameters | Updates adapters only |
-| High memory usage | Low memory usage |
-| Catastrophic forgetting risk | Much lower risk |
+| Full FT | LoRA |
+|----------|------|
+| All parameters | Adapters only |
 | Expensive | Cheap |
-| Best quality | Near-equivalent quality |
+| High memory | Low memory |
+| Forgetting risk | Lower risk |
 
----
+## Quantization
 
-## LoRA Rank (r)
-
-Controls adapter size.
-
-```text
-Higher Rank
-→ More trainable parameters
-→ Better learning
-→ More memory usage
-```
-
-Common values:
+Reduce precision:
 
 ```text
-r = 4, 8, 16
-```
-
-As:
-
-```text
-r → ∞
-```
-
-LoRA approaches full fine-tuning.
-
----
-
-# Hardware Requirements
-
-Memory per parameter:
-
-```text
-1 Parameter ≈ 4 Bytes
-```
-
-Example:
-
-```text
-1B Parameters ≈ 4 GB
-70B Parameters ≈ 280 GB
-```
-
-Training additionally requires:
-
-- Gradients
-- Optimizer states
-- Activations
-
-Result:
-
-```text
-70B Model
-≈ 1.5+ TB memory (full precision training)
-```
-
----
-
-# Quantization
-
-Reduces precision of weights.
-
-Example:
-
-```text
-32-bit → 16-bit → 8-bit → 4-bit
+32-bit
+→ 16-bit
+→ 8-bit
+→ 4-bit
 ```
 
 Benefits:
 
-- Lower VRAM usage
+- Lower VRAM
 - Faster training
 - Cheaper deployment
 
 Usually combined with LoRA.
 
----
+## Evaluating Models
 
-# Evaluating LLMs
+### BLEU
+- Translation quality
 
-Evaluation is needed to verify improvements from RAG or Fine-Tuning.
+### ROUGE
+- Summarization quality
 
-## Common Metrics
+### Perplexity
+- Model confidence
 
-| Metric | Purpose |
-|----------|---------|
-| BLEU | Translation quality |
-| ROUGE | Summarization quality |
-| Perplexity | Model confidence |
-| F1 Score | QA accuracy |
-| HELM | Holistic LLM evaluation |
+### F1
+- QA accuracy
 
----
-
-## HELM (Stanford)
-
-Holistic Evaluation of Language Models.
+### HELM
+- Overall LLM evaluation
 
 Measures:
 
@@ -582,282 +367,277 @@ Measures:
 - Fairness
 - Bias
 - Toxicity
-- Calibration
 
-Provides a comprehensive benchmark for LLM quality.
+## Training Approaches
 
----
-
-# SFT vs RLHF
-
-## Supervised Fine-Tuning (SFT)
-
-Train directly on Q&A pairs.
+### SFT
 
 ```text
 Question
 → Answer
-→ Update Weights
+→ Train
 ```
 
-Simple and commonly used.
-
----
-
-## RLHF
-
-Reinforcement Learning from Human Feedback.
-
-Process:
+### RLHF
 
 ```text
 Human Preferences
 → Reward Model
-→ PPO Optimization
-→ Improved LLM
+→ Optimisation
 ```
 
-Humans rank responses instead of providing direct labels.
+# Lecture 8 - RAG Implementation & Hybrid Retrieval
 
----
+## Building a Production RAG System
 
-# Key Takeaways
+A practical RAG system contains:
 
-```text
-RAG
-→ Adds external knowledge
-
-KAR
-→ Fixes sparse keyword retrieval problems
-
-Fine-Tuning
-→ Changes model behavior
-
-LoRA
-→ Efficient fine-tuning (<1% parameters)
-
-Quantization
-→ Reduces memory usage
-
-HELM
-→ Evaluates overall model quality
-
-Best Real-World System
-→ RAG + KAR + LoRA Fine-Tuning
-```
-
-
-# Lecture 8
-
-## Why Generic LLMs Are Not Enough
-
-- A pretrained LLM only knows what it has seen during training.
-- It cannot answer questions about proprietary company data, internal documents, or domain-specific information that was never part of its training corpus.
-- Two major solutions:
-  - **RAG (Retrieval-Augmented Generation)**
-  - **Fine-Tuning**
-- RAG is usually the preferred starting point because it is much cheaper and easier to implement.
-
-## RAG vs Fine-Tuning
-
-### RAG
-
-- Does not modify model weights.
-- Retrieves relevant information during query time.
-- Injects retrieved information into the prompt.
-- Low computational cost.
-- Best for factual knowledge retrieval.
-
-### Fine-Tuning
-
-- Updates model weights through additional training.
-- Knowledge becomes part of the model.
-- Requires significant computational resources.
-- Best for changing behaviour, style, or domain expertise.
-
----
-
-## Vector Database
-
-- Stores information in two forms:
-  - Original text chunk
-  - Vector embedding
-- Queries are also converted into vectors.
-- Similarity search finds the closest chunk vectors.
-- Retrieved text chunks are passed to the LLM.
-
----
-
-## RAG Pipeline
-
-### Indexing Phase (One-Time Process)
-
-1. Load source documents.
-2. Extract text.
-3. Split text into chunks.
-4. Generate embeddings for each chunk.
-5. Store chunk text and embeddings in a vector database.
-6. Extract and store keywords separately.
-
-### Query Phase
-
-1. Convert user query into an embedding.
-2. Perform vector similarity search.
-3. Perform keyword search.
-4. Merge both result sets.
-5. Pass retrieved chunks and query to the LLM.
-6. Generate the final response.
-
----
+- Embedding Model
+- VectorStoreIndex
+- KeywordTableIndex
+- Hybrid Retriever
+- Response Synthesizer
+- Query Engine
 
 ## Hybrid Search
 
-Hybrid search combines:
+Combines:
 
 ### Vector Retrieval
 
-- Uses semantic similarity.
-- Understands meaning and paraphrases.
-- Example:
-  - "car" ≈ "automobile"
+- Semantic similarity
+- Handles paraphrases
+
+Example:
+
+```text
+car ≈ automobile
+```
 
 ### Keyword Retrieval
 
-- Uses exact keyword matching.
-- Useful for:
+- Exact matching
+- Handles:
   - Names
   - Locations
   - IDs
   - Rare terms
 
-### Merge Strategies
+### Merge Modes
 
-#### AND Merge
+#### AND
 
-- Chunk must appear in both searches.
+- Must appear in both searches.
 - Higher precision.
-- Smaller result set.
 
-#### OR Merge
+#### OR
 
-- Chunk can appear in either search.
-- Broader coverage.
-- Larger result set.
+- Can appear in either search.
+- Higher recall.
 
----
+## Why the Same Embedding Model Matters
 
-## Why the Same Embedding Model Must Be Used
+Documents and queries must live in the same vector space.
 
-- Document chunks and user queries must exist in the same vector space.
-- Using different embedding models makes similarity scores meaningless.
-- The same embedding model must be used during:
-  - Indexing
-  - Retrieval
+```text
+Document Embeddings
+=
+Query Embeddings
+```
 
----
+Otherwise similarity search becomes meaningless.
 
 ## Encoder vs Decoder Models
 
-### Encoder Models
+### Encoder
 
-- Produce fixed-length vector representations.
-- Used for embeddings.
-- Examples:
-  - BERT
-  - Sentence Transformers
-  - embedding-001
+- Creates embeddings.
+- Produces fixed-length vectors.
 
-### Decoder Models
+Examples:
 
-- Generate text token by token.
-- Used for response generation.
-- Examples:
-  - GPT
-  - Gemini
-  - Claude
-  - LLaMA
+- BERT
+- Sentence Transformers
+- embedding-001
 
-### In RAG
+### Decoder
 
-- Encoder → Creates embeddings.
-- Decoder → Generates the final answer.
+- Generates text.
 
----
+Examples:
 
-## Chunk Size
-
-Chunk size determines how much text is stored in each chunk.
-
-### Small Chunks
-
-- Better retrieval precision.
-- Less surrounding context.
-
-### Large Chunks
-
-- More context.
-- Lower retrieval precision.
-
-Typical chunk sizes:
-
-- 1024 tokens
-- 2048 tokens
-
----
-
-## Top-K Retrieval
-
-- Top-K = Number of chunks retrieved.
-- Larger K provides more context.
-- Too large a value introduces noise and may exceed the context window.
-
-Constraint:
-
-Top-K × Chunk Size ≤ Context Window
-
----
+- GPT
+- Gemini
+- Claude
+- LLaMA
 
 ## LlamaIndex Components
 
-### Embedding Model
-
-- Converts text into vectors.
-
 ### VectorStoreIndex
-
-- Stores chunk embeddings.
+- Stores embeddings.
 
 ### KeywordTableIndex
-
-- Stores chunk keywords.
+- Stores keywords.
 
 ### Custom Retriever
-
 - Combines vector and keyword retrieval.
 
 ### Response Synthesizer
-
-- Sends retrieved chunks and query to the LLM.
+- Generates answers from retrieved chunks.
 
 ### Query Engine
+- Connects everything together.
 
-- Connects retriever and synthesizer.
+## RAG as an Agent
 
----
+A RAG system already behaves like a simple agent:
 
-## RAG as a Simple Agent
+```text
+Query
+→ Retrieve Information
+→ Generate Answer
+```
 
-- A RAG system already behaves like a basic AI agent.
-- It interacts with an external knowledge source.
-- Retrieves information.
-- Uses that information to answer questions.
+More advanced agents extend this idea using:
 
-More advanced agents extend the same idea to:
-
-- Web Search
+- Search APIs
 - Databases
 - Email APIs
-- Calendar APIs
+- External services
+# Lecture 9 - Agentic AI & CrewAI
+
+## What is an Agent?
+
+- An autonomous workflow that performs actions towards a goal.
+- LLMs may be used in some steps, but not necessarily all.
+
+Possible actions:
+
+- API Calls
+- Database Queries
+- Python Functions
 - External Services
 
-RAG is the foundation of modern AI agent systems.
+## CrewAI
+
+Framework for building multi-agent systems.
+
+Main Components:
+
+### Agent
+
+Defined by:
+
+- Role
+- Goal
+- Backstory
+- Tools
+- LLM
+
+### Task
+
+Defines:
+
+- What to do
+- Expected output
+- Assigned agent
+
+### Crew
+
+Combines agents and tasks.
+
+## Execution Modes
+
+### Sequential
+
+```text
+Task A
+→ Task B
+→ Task C
+```
+
+### Parallel
+
+```text
+Task A
+↘
+  Merge
+↗
+Task B
+```
+
+## Example Pipeline
+
+| Step | Agent | Tool |
+|--------|--------|--------|
+| Research | Researcher | Search API |
+| Writing | Writer | LLM |
+| Review | Reviewer | LLM |
+| Rewrite | Rewriter | LLM |
+| Send | Sender | Email API |
+
+## Tools
+
+Agents can use:
+
+- Google Search
+- Brave Search
+- SQL Databases
+- Vector Databases
+- Email APIs
+- Custom Python Functions
+
+## RAG vs Agentic AI
+
+| RAG | Agentic AI |
+|------|-----------|
+| Fixed knowledge | Live data |
+| Single workflow | Multi-step workflow |
+| Retrieval + generation | Planning + tools + generation |
+| Lower complexity | Higher complexity |
+
+## Caching
+
+Store results from previous runs.
+
+Benefits:
+
+- Lower latency
+- Lower API costs
+- Faster execution
+
+## Limitations
+
+### No Memory
+
+- Agents do not remember previous runs.
+
+### Probabilistic Outputs
+
+- Same task may produce different outputs.
+
+### Automation Risks
+
+Avoid autonomous control over:
+
+- Payments
+- Financial transactions
+- Irreversible actions
+
+Human approval should remain in the loop.
+
+## Key Idea
+
+Modern AI systems often combine:
+
+```text
+RAG
++
+Agents
++
+Tools
++
+Fine-Tuning
+```
+
+to build production-grade applications.
