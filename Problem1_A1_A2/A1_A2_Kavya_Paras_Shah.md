@@ -65,7 +65,7 @@ Subject to all constraints, the system aims to maximize the usable building area
 
 ## 4. User Prompts
 
-###Agent 1 Prompt
+### Agent 1 Prompt
 Generates Python code (using a DXF library) to create a 2D engineering drawing (.dxf/.dwg file) of a house plot layout. 
 Component Tool/Technology: 2D Drawing File Format .dxf (DXF Python library — ezdxf) Code Generator LLM (YOU) Constraint Solver Z3 Solver (Microsoft Research) Constraint
  Source Seattle Building Code (SBC) — https://www.seattle.gov/sdci/codes/codes-we-enforce-(a-z)/building-code 
