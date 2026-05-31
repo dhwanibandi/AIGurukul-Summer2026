@@ -11,7 +11,7 @@ The solution follows a collaborative **Design–Validation framework** consistin
 | Agent | Function | Model | Primary Duties |
 |---------|----------|---------|----------------|
 | Design Agent | Footprint Creation | Claude Sonnet (Low Effort) | Interprets plot geometry and regulatory requirements, determines the optimal buildable region, and generates coordinate points defining the house boundary. |
-| Validation Agent | Regulatory Review | Grok | Independently verifies the proposed footprint, performs geometric checks, detects violations, and returns corrective feedback. |
+| Validation Agent | Regulatory Review | Gemini Pro | Independently verifies the proposed footprint, performs geometric checks, detects violations, and returns corrective feedback. |
 
 ### Iterative Execution Process
 
