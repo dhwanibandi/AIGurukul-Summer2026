@@ -33,7 +33,7 @@ The goal was to use two AI agents — one to generate code and one to verify it 
 - Rear: 25ft inward from the north wall
 - Sides: 5ft inward from all remaining walls
 
-**Output required:** Python/ezdxf code with layers `PROPERTY_LINE`, `BUILDING_FOOTPRINT`, `TREE`, `ENTRY`, `DIRECTIONS`. Must print buildable area and % utilization. A sketch of the plot is attached.
+**Output required:** Python/ezdxf code with layers `PROPERTY_LINE`, `BUILDING_FOOTPRINT`, `TREE`, `ENTRY`, `DIRECTIONS`. Must print buildable area and % utilization.
 
 ### Task Flowchart
 
