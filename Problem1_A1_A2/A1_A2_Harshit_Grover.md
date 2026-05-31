@@ -642,6 +642,7 @@ if __name__ == "__main__":
 - Both A1 and A2 sometimes manipulated its calculations to match what was already in the code, even when that was incorrect.
 - Number of iterations was not fixed — in some runs the first output was already correct, in others it took more rounds.
 - Most errors were in misinterpreting the plot boundaries, specifically which setback applies to which wall.
+- In both approaches, A2 sometimes claimed to use Z3 without actually using the solver. It either hardcoded expected values or performed the checks manually. Even the first generated `z3solver.py` script did not genuinely use Z3 for verification, despite presenting itself as a Z3-based solver.
 
 **Comparison between Approaches:**
 
