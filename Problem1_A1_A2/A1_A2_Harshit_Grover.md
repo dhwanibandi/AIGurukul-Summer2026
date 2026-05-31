@@ -10,19 +10,19 @@ The goal was to use two AI agents — one to generate code and one to verify it 
 
 **Plot (irregular polygon, all dimensions in feet):**
 
-| Segment | Direction | Length | To |
-|---|---|---|---|
-| Start | — | — | (0, 0) |
-| West wall | North | 76 ft | (0, 76) |
-| North wall (lower) | East | 75 ft | (75, 76) |
-| Step up | North | 4 ft | (75, 80) |
-| North wall (upper) | East | 5 ft | (80, 80) |
-| East wall | South | 80 ft | (80, 0) |
-| Step in | West | 5 ft | (75, 0) |
-| Right notch wall | South | 8 ft | (75, -8) |
-| South entry wall | West | 40 ft | (35, -8) |
-| Left notch wall | North | 8 ft | (35, 0) |
-| South base wall | West | 35 ft | (0, 0) |
+| Direction | Length | To |
+|---|---|---|
+| — | — | (0, 0) |
+| North | 76 ft | (0, 76) |
+| East | 75 ft | (75, 76) |
+| North | 4 ft | (75, 80) |
+| East | 5 ft | (80, 80) |
+| South | 80 ft | (80, 0) |
+| West | 5 ft | (75, 0) |
+| South | 8 ft | (75, -8) |
+| West | 40 ft | (35, -8) |
+| North | 8 ft | (35, 0) |
+| West | 35 ft | (0, 0) |
 
 **Physical constraints:**
 - Entry on the 40ft south-facing wall between (35, −8) and (75, −8), to be marked in the drawing
